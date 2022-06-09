@@ -4,6 +4,7 @@ import time
 import numpy as np
 from gridemissions.eia_api import SRC, KEYS
 from gridemissions.load import BaData
+import pandas as pd
 
 
 # UNK is 2017 average US power grid intensity according to Schivley 2018
@@ -120,6 +121,7 @@ class BaDataEmissionsCalc(object):
             )
 
         # Create columns for pairwise trade
+        cols = []
         for ba in self.regions:
             for ba2 in self.ba_data.get_trade_partners(ba):
                 imp = self.df.loc[:, self.KEY_E["ID"] % (ba, ba2)].apply(
@@ -128,10 +130,12 @@ class BaDataEmissionsCalc(object):
                 exp = self.df.loc[:, self.KEY_E["ID"] % (ba, ba2)].apply(
                     lambda x: max(x, 0)
                 )
-                self.df.loc[:, self.KEY_poll["ID"] % (ba, ba2)] = (
+                cols.append((
                     imp * self.df.loc[:, "%si_%s_D" % (self.poll, ba2)]
                     + exp * self.df.loc[:, "%si_%s_D" % (self.poll, ba)]
-                )
+                ).rename(self.KEY_poll["ID"] % (ba, ba2)))
+        all_cols = pd.concat(cols,axis=1)
+        self.df = pd.concat([self.df,all_cols], axis=1)
 
         # Create columns for total trade
         for ba in self.regions:
@@ -195,7 +199,7 @@ class BaDataEmissionsCalc(object):
             for j, rj in enumerate(self.regions):
                 if KEYS["E"]["ID"] % (ri, rj) in row.index:
                     ID[i][j] = row[KEYS["E"]["ID"] % (ri, rj)]
-
+        # F = produced emissions 
         F = row[[("%s_%s_NG") % (self.poll, ba) for ba in self.regions]].values
         X = [np.nan for ba in self.regions]
         try:
