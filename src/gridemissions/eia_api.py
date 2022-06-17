@@ -277,6 +277,7 @@ class EBA_data_scraper(EIA_Scraper):
         generation by source columns where a lot of them are missing.
         """
         max_calls = 100
+        #print(f"{series_id}", end="...")
 
         if isinstance(series_id, str):
             series_id = [series_id]

@@ -65,6 +65,15 @@ class BaDataBasicCleaner(BaDataCleaner):
 
     We run this as the first step of the cleaning process.
     """
+    def __init__(self, ba_data, add_ca_fuels:bool=True):
+        """
+        Parameters
+        ----------
+        ba_data : BaData object
+        add_ca_fuels : bool, Add GEO and BIO columns for CISO generation?
+        """
+        self.add_ca_fuels = add_ca_fuels
+        super().__init__(ba_data)
 
     def process(self):
         self.logger.info("Running BaDataBasicCleaner")
@@ -89,15 +98,16 @@ class BaDataBasicCleaner(BaDataCleaner):
                 -data.df.loc[:, data.KEY["NG"] % ba] + 1.0
             )
 
-        # Add columns for biomass and geothermal for CISO
-        # We are assuming constant generation for each of these sources
-        # based on historical data. Before updating this, need to
-        # contact the EIA API maintainers to understand why this isn't
-        # reported and where to find it
-        self.logger.info("Adding GEO and BIO columns for CISO")
-        data.df.loc[:, "EBA.CISO-ALL.NG.GEO.H"] = 900.0
-        data.df.loc[:, "EBA.CISO-ALL.NG.BIO.H"] = 600.0
-#         data.df.loc[:, "EBA.CISO-ALL.NG.H"] += 600.0 + 900.0
+        if self.add_ca_fuels:
+            # Add columns for biomass and geothermal for CISO
+            # We are assuming constant generation for each of these sources
+            # based on historical data. Before updating this, need to
+            # contact the EIA API maintainers to understand why this isn't
+            # reported and where to find it
+            self.logger.info("Adding GEO and BIO columns for CISO")
+            data.df.loc[:, "EBA.CISO-ALL.NG.GEO.H"] = 900.0
+            data.df.loc[:, "EBA.CISO-ALL.NG.BIO.H"] = 600.0
+#           data.df.loc[:, "EBA.CISO-ALL.NG.H"] += 600.0 + 900.0
 
         # Add columns for the BAs that are outside of the US
         foreign_bas = list(

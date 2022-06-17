@@ -26,6 +26,7 @@ def make_dataset(
     tmp_folder="tmp",
     folder_hist=None,
     scrape=True,
+    add_ca_fuels:bool=True,
 ):
     """
     Make dataset between two dates
@@ -34,6 +35,8 @@ def make_dataset(
     data through the cleaning workflow before computing consumption emissions.
 
     Uses historical data if available.
+
+    Option to add CISO fuels not reported in 930 (GEO, BIO)
     """
     start_time = time.time()
 
@@ -51,7 +54,7 @@ def make_dataset(
     # Basic data cleaning
     logger.info("Basic data cleaning")
     data = BaData(fileNm=join(tmp_folder, "%s_raw.csv" % file_name))
-    cleaner = BaDataBasicCleaner(data)
+    cleaner = BaDataBasicCleaner(data, add_ca_fuels=add_ca_fuels)
     cleaner.process()
     cleaner.r.df.to_csv(join(tmp_folder, "%s_basic.csv" % file_name))
     data = cleaner.r
