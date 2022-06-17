@@ -323,7 +323,7 @@ class BaDataRollingCleaner(BaDataCleaner):
 
             # Overwrite with the new data
             old_rows = df_hist.index.difference(data.df.index)
-            df_hist = data.df.append(df_hist.loc[old_rows, :], sort=True)
+            df_hist = pd.concat([data.df, df_hist.loc[old_rows, :]])
             df_hist.sort_index(inplace=True)
 
         except FileNotFoundError:

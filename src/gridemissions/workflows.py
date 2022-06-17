@@ -27,6 +27,7 @@ def make_dataset(
     folder_hist=None,
     scrape=True,
     add_ca_fuels:bool=True,
+    calc_consumed:bool=True,
 ):
     """
     Make dataset between two dates
@@ -101,11 +102,12 @@ def make_dataset(
     cleaner.r.df.to_csv(join(tmp_folder, "%s_elec.csv" % file_name))
     data = cleaner.r
 
-    # Consumption-based emissions
-    logger.info("Computing consumption-based emissions")
-    co2_calc = BaDataEmissionsCalc(data)
-    co2_calc.process()
-    co2_calc.poll_data.df.to_csv(join(tmp_folder, "%s_co2.csv" % file_name))
+    if calc_consumed:
+        # Consumption-based emissions
+        logger.info("Computing consumption-based emissions")
+        co2_calc = BaDataEmissionsCalc(data)
+        co2_calc.process()
+        co2_calc.poll_data.df.to_csv(join(tmp_folder, "%s_co2.csv" % file_name))
 
     logger.info(
         "gridemissions.workflows.make_dataset took %.2f seconds" % (time.time() - start_time)
