@@ -28,4 +28,5 @@ setup(
             "ampd=gridemissions.scripts.ampd:main",
         ],
     },
+    include_package_data=True,
 )
