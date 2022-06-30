@@ -216,7 +216,7 @@ class BaDataBasicCleaner(BaDataCleaner):
 
 def rolling_window_filter(
     df,
-    offset=10 * 24,
+    offset=20 * 24,
     min_periods=100,
     center=True,
     replace_nan_with_mean=True,
@@ -249,10 +249,11 @@ def rolling_window_filter(
     """
     for col in df.columns:
         rolling_ = df[col].rolling(offset, min_periods=min_periods, center=center)
-        mean_ = rolling_.mean()
-        std_ = rolling_.std().apply(lambda x: max(100, x))
-        ub = mean_ + 4 * std_
-        lb = mean_ - 4 * std_
+        median_ = rolling_.median()
+        # 84.1 % quantile = mean + 1 std in normal data 
+        iqr_ = (rolling_.quantile(.95) - rolling_.quantile(.05)).apply(lambda x: max(150, x))
+        ub = median_ + 3 * iqr_
+        lb = median_ - 3 * iqr_
         idx_reject = (df[col] >= ub) | (df[col] <= lb)
         df.loc[idx_reject, col] = np.nan
         if replace_nan_with_mean:
@@ -260,7 +261,7 @@ def rolling_window_filter(
             df.loc[:, col] = df.loc[:, col].interpolate(limit=3)
             # If there is more than 3 hours of missing data, use rolling mean
             df.loc[df[col].isnull(), col] = mean_.loc[df[col].isnull()]
-
+    
     if return_mean:
         mean_ = df.rolling(offset, min_periods=min_periods, center=center).mean()
         return (df, mean_)
