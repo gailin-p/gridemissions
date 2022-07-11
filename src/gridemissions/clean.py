@@ -260,7 +260,7 @@ def rolling_window_filter(
             # First try interpolating linearly, but only for up to 3 hours
             df.loc[:, col] = df.loc[:, col].interpolate(limit=3)
             # If there is more than 3 hours of missing data, use rolling mean
-            df.loc[df[col].isnull(), col] = mean_.loc[df[col].isnull()]
+            df.loc[df[col].isnull(), col] = median_.loc[df[col].isnull()]
     
     if return_mean:
         mean_ = df.rolling(offset, min_periods=min_periods, center=center).mean()
