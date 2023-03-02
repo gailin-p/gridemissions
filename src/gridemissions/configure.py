@@ -108,12 +108,12 @@ for k in config:
 
 # Setup logging
 try:
-    logging.config.fileConfig(LOG_CONFIG_FILE_PATH)
+    logging.config.fileConfig(LOG_CONFIG_FILE_PATH, disable_existing_loggers=False)
 except KeyError:
     print(f"Generating logging config file in {CONFIG_DIR_PATH} with default values")
     with open(LOG_CONFIG_FILE_PATH, "w") as f:
         f.write(DEFAULT_LOGGING_CONF)
-    logging.config.fileConfig(LOG_CONFIG_FILE_PATH)
+    logging.config.fileConfig(LOG_CONFIG_FILE_PATH, disable_existing_loggers=False)
 
 if "ENV" not in config:
     config["ENV"] = ""
